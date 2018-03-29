@@ -1,0 +1,63 @@
+<% include _header2 %>
+
+<h3>Add Poll</h3>
+
+<form action="/users/polls/add" method="post">
+    <p> Poll name: </p>
+    <input name="pollname" type="text" class="form-control" placeholder="Pollname" required autofocus><br>
+    <p>Question: </p>
+    <textarea name="question" type="text" class="form-control" placeholder="Enter your question here" style="resize: none" required></textarea>
+    <br>
+    
+    <p>Options (Enter each option in one line): </p>
+    <div class="optionsbox"></div>
+    <a id="add" href="#">Add Options </a>
+    <a id="delete" href="#" style="display: none"> Delete Options</a>
+  
+    
+    
+    <script>
+        $(document).ready(function() {
+            var max_fields = 10;
+            var wrapper = $(".optionsbox");
+            var x = 2;
+            var deleteButton = $("#delete");
+
+            $(wrapper).append('<div id="option1" style="margin-bottom: 5px"><input type="text" class="form-control" name="option1" placeholder="Enter option"/></div>'); 
+            $(wrapper).append('<div id="option2" style="margin-bottom: 5px"><input type="text" class="form-control" name="option2" placeholder="Enter option"/>'); 
+ 
+            $("#add").click(function(e){
+                e.preventDefault();
+               if(x < max_fields){
+                    x++;
+                    let option = "option"+x;
+                    let txt = "<div id=\"" + option + "\" style=\"margin-bottom: 5px\"><input type=\"text\" class=\"form-control\" name=\"" + option + "\" placeholder=\"Enter option\"/></div>";
+                    //console.log(x, txt);
+                    $(wrapper).append(txt); 
+               
+                 if ( x> 2) $(deleteButton).show();
+          
+                }
+            else
+            {
+            alert('You Reached the limits')
+            }
+              
+            });
+          
+
+           $(deleteButton).click(function(e){
+                e.preventDefault(); 
+                option = "#"+"option"+x;
+                  console.log(option);
+                $(option).remove(); x--;
+                if(x === 2) $(deleteButton).hide();
+                });
+        });
+</script>
+    <br><br>
+    <input type="submit" value="Add Poll" class="btn btn-primary">
+</form>
+
+<% include _footer %>
+

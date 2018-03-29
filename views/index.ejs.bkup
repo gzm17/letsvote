@@ -1,0 +1,44 @@
+<% include _header %>
+
+
+<% if((currentUser) && mypolls.length !== 0) { %> 
+
+<h2> My polls: <a href="/users/polls/add"> Add polls</a></h1>
+<br>
+
+<% mypolls.forEach(function(poll) { %>
+    <div class="panel panel-default panel-body" >
+        <a href="/users/polls/<%=poll._id %>" style="font-size: 18px">
+            <%= poll.question %>
+        </a>
+    <p>Number of votes: <%= poll.votes %>. The poll is <%= poll.status %> and was created on <%= poll.createdAt %></p>
+    </div>
+    
+<% }); %>
+<% } %>
+
+
+<% if (currentUser) { %> 
+<h2> Other polls: </h1>
+<% } %>
+<% if (!currentUser) { %>
+<h2> All polls: </h1>
+<% } %>
+<br>
+
+<% if ( polls.length !== 0) { %>
+<% polls.forEach(function(poll) { %>
+    <div class="panel panel-default panel-body">
+        <a href="/users/polls/<%=poll._id %>" style="font-size: 18px">
+            <%= poll.question %>
+        </a>
+    <p>Number of votes: <%= poll.votes %>. The poll is <%= poll.status %> and was created on <%= poll.createdAt %>
+    </p>
+    
+    </div>
+    
+<% }); %>
+<% } %>
+
+
+<% include _footer %>

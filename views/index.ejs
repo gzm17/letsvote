@@ -1,0 +1,122 @@
+<% include _header %>
+
+<script>
+    $(document).ready(function(){
+        var mypolls = <%- JSON.stringify(mypolls) %>;
+        var polls = <%- JSON.stringify(polls) %>, displayed = false, pollsForDisplay, all = false, count;
+        // pollsForDisplay is used for filtering polls - it keeps either polls or mypolls
+        
+        //display all polls upon user selection (in _header.ejs)
+        $("#all").on("click", function(){ 
+            $("#body").empty(); //clear the screen
+            $("#body").append("<h3>All polls </h3>");
+            all = true;
+            displayPolls(polls, all);
+            pollsForDisplay = polls.slice(0);
+            displayed = true;
+        });
+        
+        //display my polls upon user selection (in _header.ejs)
+        $("#my").on("click", function(){ 
+            if(mypolls.length === 0) {
+                $("#body").empty(); //clear the screen
+                $("#body").append("<h3>My polls: nothing to display </h3>");
+            }
+            else {
+                $("#body").empty(); //clear the screen
+                $("#body").append("<h3>My polls </h3>");
+                all = false;
+                displayPolls(mypolls, all);
+                pollsForDisplay = mypolls.slice(0);
+            }
+                displayed = true;
+        });
+        
+        // default display when nothing is selected yet
+        if (!displayed) {
+            $("#body").empty(); //clear the screen
+            $("#body").append("<h3>All polls </h3>");
+            all = true;
+            displayPolls(polls, all);
+            pollsForDisplay = polls.slice(0);
+        }
+        
+        // filter polls based on search words
+        $("#searchbutton").on("click", function(){
+            var words = $("#searchwords").val().toLowerCase().split(" ");
+            var selection = [];
+            console.log("searchwords and arrays: ", words, pollsForDisplay);
+
+            for (let i = 0; i < pollsForDisplay.length; i++) {
+                let poll = pollsForDisplay[i];
+                poll.question = poll.question.toLowerCase().replace("?", "");
+                for (let n = 0; n < poll.options.length; n++) {
+                    poll.options[n].option = poll.options[n].option.toLowerCase();
+                }
+                count = 0;
+                console.log("poll - ", poll);
+                for (let j = 0; j < words.length; j++) {
+                    count += (poll.question.match(new RegExp(words[j], "g")) || []).length;
+                    console.log("poll - question match:", count, poll.question, words[j]);
+                    for (let k = 0; k < poll.options.length; k++) {
+                        count += (poll.options[k].option.match(new RegExp(words[j], "g")) || []).length;
+                        console.log("poll - option match:", count, poll.options[k].option, words[j]);
+                    }
+                if (count > 0) {
+                    poll.count = count;
+                    selection.push(poll);
+                    console.log("selection push:", poll);
+                }   
+                }
+            }
+            
+            if(selection.length > 0) {
+                selection.sort(function(a, b) { //sort by descreasing order
+                    return b.count - a.count;
+                });
+                console.log("selection: ", selection);
+                $("#body").empty(); //clear the screen
+                if(all) $("#body").append("<h3>All polls </h3>");
+                else $("#body").append("<h3>My polls </h3>");
+                displayPolls(selection, all);
+            }
+            
+        });
+        
+        //share feature from social-share, done in html
+        $("#share").on("click", function(){
+            console.log("Inpage link");
+            $("body").append("a").attr("class", "twitter-share-button").attr("href", "https://twitter.com/intent/tweet").attr("id", "ss");
+            $("#ss").attr("data-text", "Check out this interesting stuff");
+            $("#ss").trigger();
+        });
+        
+    });
+    
+    function displayPolls(polls, all){
+        var i, poll;
+        for ( i = 0; i < polls.length; i++) {
+            poll =  "<div class=\"panel panel-default panel-body\">" +
+                    "<a href=\"/users/polls/" + polls[i]._id + "\" style=\"font-size: 18px\">" +
+                    polls[i].question + "</a>" +
+                    "<p>Number of votes: " + polls[i].votes +". The poll is " + polls[i].status + " and was created on "+ polls[i].createdAt +
+                    "</p>";
+            
+            //if user logged in, present edit, share and delete options
+            if(!all) {
+                poll = poll + "<form class=\"form-inline\" method=\"post\" >" +
+                            "<input type=\"submit\" class=\"btn btn-default\" formaction=\"/users/polls/edit/" + polls[i]._id + "\" value=\"Edit\" style=\"width: 70px\">" +
+                            "<input type=\"submit\" class=\"btn btn-default\" formaction=\"/users/polls/delete/" + polls[i]._id + "\" value=\"Delete\" style=\"margin-left: 20px; width: 70px\">" +
+                            "<input type=\"submit\" class=\"btn btn-default\" formaction=\"/users/polls/share/" + polls[i]._id + "\" id=\"share\" value=\"Share\" style=\"margin-left: 20px; width: 70px\">" +
+                        "</form>";
+                console.log("polls-id: ", i, polls[i]._id);
+            }
+                    
+            $("#body").append(poll);
+        }
+        
+    }
+    
+</script>
+
+<% include _footer %>

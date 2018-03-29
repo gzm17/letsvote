@@ -1,0 +1,117 @@
+<% include _header2 %>
+
+<h3>Poll name: <%=poll.name%></h3>
+
+<div class="panel panel-default">
+    <div class="panel-heading"> <%= poll.question %> </div>
+    <div class="panel-body">
+        <div class="row">
+        <div class="col-sm-6" style="min-height: 400px;">
+        <p>Options: </p>
+        <form action="/users/polls/vote" method="post">
+            <input type="hidden" name="pollID" value=<%=poll._id%> >
+            <br>
+            <br>
+        <% for ( let i = 0; i< poll.options.length; i++) { %>
+            <input type="radio" class="options" name="option" value=<%=i %> ><span> &nbsp;&nbsp;  Option <%=i+1%>: <%=poll.options[i].option%></span>
+            <br><br>
+        <% } %>
+        <br>
+        </div>
+        <div class="col-sm-6" id="pollchart" style="min-height: 400px;">
+            <p> Chart: # of votes </p>
+        </div>
+     
+        
+        <input type="submit" id="vote" value="Vote" class="btn btn-primary" style="margin-left: 20px">
+                
+    <script>
+        
+        $(document).ready(function() {
+            $('#vote').attr("disabled", true);
+            $("input[name='option'").on("click", function(){ //turn vote submit button on if any radio button is clicked
+                $("#vote").attr("disabled", false);
+            });
+            
+            
+            //the block of code until the end is for charting. It is borrowed and modified from 
+            //https://bl.ocks.org/d3noob/bdf28027e0ce70bd132edc64f1dd7ea4
+            //pass poll variable to javascript
+            var data = <%- JSON.stringify(poll) %>;
+            console.log("poll:", data);
+
+                // set the dimensions and margins of the graph
+            var margin = {top: 40, right: 20, bottom: 20, left: 30},
+                width = 960/2.5 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom;
+            
+            // set the ranges
+            var x = d3.scaleBand()
+                      .range([0, width])
+                      .padding(0.3);
+            var y = d3.scaleLinear()
+                      .range([height, 0]);
+                      
+            // append the svg object to the body of the page
+            // append a 'group' element to 'svg'
+            // moves the 'group' element to the top left margin
+            var svg = d3.select("#pollchart").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", 
+                      "translate(" + margin.left + "," + margin.top + ")");
+            
+            for (let i = 0; i< data.options.length; i++) //adding names to options for use of charting x-axis
+                data.options[i].name = "Option " + (i+1);
+                
+            // Scale the range of the data in the domains
+            x.domain(data.options.map(function(d) { return d.name; }));
+            y.domain([0, d3.max(data.options, function(d) { return d.votes; })]);
+            console.log("added options.name: ", data.options);
+            
+            // append the rectangles for the bar chart
+            var bar = svg.selectAll(".bar")
+                .data(data.options)
+                .enter();
+                bar.append("rect")
+                  .attr("class", "bar")
+                  .attr("x", function(d) { return x(d.name); })
+                  .attr("width", x.bandwidth())
+                  .attr("y", function(d) { return y(d.votes); })
+                  .attr("height", function(d) { return height - y(d.votes); })
+                  .attr("fill", "#0099cc");
+            
+            //add labels
+            bar.append("text")
+                .attr("x", function(d) {return x(d.name)+10; })
+                .attr("y", function(d) {return y(d.votes)-5;})
+                .text(function(d){return d.votes;})
+                .attr("font-size", "10px");
+            
+            // add the x Axis
+            svg.append("g")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(d3.axisBottom(x));
+            
+            // add the y Axis
+            svg.append("g")
+                  .call(d3.axisLeft(y));
+                  
+        //end of charting
+            
+        });
+</script>   
+        
+        </form>
+        </div>
+    </div>
+    <div class="panel-body">Number of votes: <%= poll.votes %>. The poll is <%= poll.status %> and was created on <%= poll.createdAt %>
+    </div>
+    
+    </div>
+    
+    
+
+<% include _footer %>
+

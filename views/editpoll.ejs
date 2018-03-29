@@ -1,0 +1,73 @@
+<% include _header2 %>
+
+<h3>Edit Poll</h3>
+
+<form action="/users/polls/update" method="post">
+    <p> Poll name: </p>
+    <input id="pollname" name="pollname" type="text" class="form-control" required autofocus><br>
+    <input type="hidden" name="pollID" value=<%=poll._id%> >
+    <p>Question: </p>
+    <textarea id="pollquestion" name="question" type="text" class="form-control" style="resize: none" required></textarea>
+    <br>
+    
+    <p>Options (Enter each option in one line): </p>
+    <div class="optionsbox"></div>
+    <a id="add" href="#">Add Options </a>
+    <a id="delete" href="#" style="display: none"> Delete Options</a>
+  
+    
+    <script>
+        $(document).ready(function() {
+            var poll = <%- JSON.stringify(poll) %>;
+            var max_fields = 10;
+            var wrapper = $(".optionsbox");
+            var x = poll.options.length;
+            var deleteButton = $("#delete");
+            
+            $("#pollname").val(poll.name);
+            $("#pollquestion").val(poll.question);
+            
+            for (let i = 0; i < poll.options.length; i++) {
+                let tmp = "option" + (i+1)*1, inputid = "inputid" + (i+1)*1;
+                content = "<div id=" + tmp + " style=\"margin-bottom: 5px\"><input type=\"text\" class=\"form-control\" id=" + inputid + " name=\"opts\"></div>";
+                $(wrapper).append(content);
+                $("#"+inputid).val(poll.options[i].option);
+                console.log("poll option ", poll.options[i].option);
+            }
+            
+
+            $("#add").click(function(e){
+                e.preventDefault();
+               if(x < max_fields){
+                    x++;
+                    let option = "option"+x;
+                    let txt = "<div id=\"" + option + "\" style=\"margin-bottom: 5px\"><input type=\"text\" class=\"form-control\" name=\"opts\" placeholder=\"Enter option\"/></div>";
+                    //console.log(x, txt);
+                    $(wrapper).append(txt); 
+               
+                 if ( x> 2) $(deleteButton).show();
+          
+                }
+            else
+            {
+            alert('You Reached the limits')
+            }
+              
+            });
+          
+
+           $(deleteButton).click(function(e){
+                e.preventDefault(); 
+                option = "#"+"option"+x;
+                  console.log(option);
+                $(option).remove(); x--;
+                if(x === 2) $(deleteButton).hide();
+                });
+        });
+</script>
+    <br><br>
+    <input type="submit" value="Update Poll" class="btn btn-primary">
+</form>
+
+<% include _footer %>
+

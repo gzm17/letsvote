@@ -12,7 +12,7 @@ var routes = require("./routes/routes"); //direct file to routes dir
 
 var app = express();
 
-mongoose.connect("mongodb://localhost:27018/test"); //use the test db - when is test created??
+mongoose.connect("mongodb://localhost:27017/test"); //use the test db - when is test created??
 setUpPassport();
 
 app.set("port", process.env.PORT || 3000); 

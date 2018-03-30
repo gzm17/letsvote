@@ -11,8 +11,10 @@ var setUpPassport = require("./setuppassport");
 var routes = require("./routes/routes"); //direct file to routes dir
 
 var app = express();
+var url = process.env.MONGOLAB_URI;
 
-mongoose.connect("mongodb://localhost:27017/test"); //use the test db - when is test created??
+//mongoose.connect("mongodb://localhost:27017/test"); //use the test db - when is test created??
+mongoose.connect(url); //use the mLab free tier db
 setUpPassport();
 
 app.set("port", process.env.PORT || 3000); 
